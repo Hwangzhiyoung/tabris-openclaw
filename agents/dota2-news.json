@@ -9,10 +9,11 @@
     {
       "type": "search",
       "query": "DOTA2 每日新闻 今日 DOTA2 赛事动态 战队变动",
-      "max_results": 5
+      "max_results": 3
     },
     {
       "type": "summarize",
+      "stream": true,
       "prompt": "请将搜索到的信息总结为一份 DOTA2 每日新闻报，分模块展示：【赛事动态】、【战队变动】、【游戏更新】、【社区热点】。语气要专业且充满热爱。"
     },
     {

@@ -64,6 +64,35 @@ npm install -g dotenv-cli
 dotenv -- openclaw gateway start --config ./openclaw.json
 ```
 
+## 远程服务器部署 (Ubuntu/Linux)
+
+为了实现 24/7 不间断推送，建议将项目部署到 Linux 云服务器（如阿里云、腾讯云、AWS）。
+
+### 1. 自动化部署环境
+在服务器上运行以下脚本，自动安装 Node.js v22、pnpm、OpenClaw 和 PM2：
+```bash
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+```
+
+### 2. 使用 PM2 实现后台持久运行
+在服务器上建议使用 PM2 管理进程，确保断线重连和开机自启：
+```bash
+# 启动网关
+dotenv -- pm2 start openclaw --name "openclaw-gateway" -- gateway start --config ./openclaw.json
+
+# 查看运行日志
+pm2 logs openclaw-gateway
+
+# 设置开机自启 (根据提示执行输出的命令)
+pm2 save
+pm2 startup
+```
+
+### 3. 服务器防火墙配置
+- 确保服务器防火墙（安全组）已开放 `8080` 端口（或你在 `openclaw.json` 中配置的端口），以便访问 Web Dashboard。
+- 飞书机器人使用 WebSocket 模式，不需要开放入站端口即可接收消息。
+
 ### 3. 加载任务
 ```bash
 openclaw agents load ./agents/dota2-news.json

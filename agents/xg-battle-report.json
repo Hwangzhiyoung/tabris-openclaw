@@ -13,6 +13,7 @@
     },
     {
       "type": "summarize",
+      "stream": true,
       "prompt_file": "xg_battle_report_prompt.md"
     },
     {
