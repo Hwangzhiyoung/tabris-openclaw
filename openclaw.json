@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.8",
+    "lastTouchedAt": "2026-03-12T12:59:16.333Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-03-12T12:00:56.255Z",
+    "lastRunVersion": "2026.3.8",
+    "lastRunCommand": "doctor",
+    "lastRunMode": "local"
+  },
+  "agents": {
+    "defaults": {
+      "model": "openrouter/deepseek/deepseek-v3.2",
+      "memorySearch": {
+        "enabled": false
+      }
+    },
+    "list": [
+      {
+        "id": "main"
+      },
+      {
+        "id": "dota2-news",
+        "name": "DOTA2 每日新闻官",
+        "agentDir": "~/.openclaw/agents/dota2-news/agent"
+      },
+      {
+        "id": "xg-battle-report",
+        "name": "XG 战报专家",
+        "agentDir": "~/.openclaw/agents/xg-battle-report/agent"
+      }
+    ]
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "channels": {
+    "feishu": {
+      "enabled": true,
+      "connectionMode": "websocket",
+      "appId": "${FEISHU_APP_ID}",
+      "appSecret": "${FEISHU_APP_SECRET}",
+      "verificationToken": "${FEISHU_VERIFICATION_TOKEN}",
+      "groupAllowFrom": [
+        "*"
+      ]
+    }
+  },
+  "gateway": {
+    "port": 8080,
+    "mode": "local",
+    "auth": {
+      "token": "${GATEWAY_TOKEN}"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "feishu": {
+        "enabled": true
+      }
+    }
+  }
+}

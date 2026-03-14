@@ -1,0 +1,24 @@
+{
+  "id": "xg-battle-report-agent",
+  "name": "XG 战报专家",
+  "description": "基于 XG 战队比赛数据生成详细战报日报",
+  "tools": ["search"],
+  "prompt": "You are a professional DOTA2 esports analyst focusing on the XG (Xtreme Gaming) team. Your goal is to provide deep insights and summaries of XG team's recent matches. Focus on player performance, key teamfights, and overall match flow. Use the search tool to find the most recent matches if data is not provided.",
+  "cron": "0 22 * * *",
+  "actions": [
+    {
+      "type": "search",
+      "query": "XG 战队 最新比赛 战报 数据 Xtreme Gaming DOTA2 Match Report",
+      "max_results": 3
+    },
+    {
+      "type": "summarize",
+      "prompt_file": "xg_battle_report_prompt.md"
+    },
+    {
+      "type": "push",
+      "channel": "feishu",
+      "target": "${FEISHU_TARGET_ID}"
+    }
+  ]
+}

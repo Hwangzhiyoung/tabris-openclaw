@@ -1,0 +1,24 @@
+{
+  "id": "dota2-news-agent",
+  "name": "DOTA2 每日新闻官",
+  "description": "每天自动抓取 DOTA2 相关新闻并生成日报推送给飞书",
+  "tools": ["search"],
+  "prompt": "You are a DOTA2 news officer. Your task is to search for the latest DOTA2 news today and summarize them into a daily report. The report should include tournament updates, team roster changes, game updates, and major community events. Output format should be a clean markdown message in Chinese.",
+  "cron": "0 10 * * *",
+  "actions": [
+    {
+      "type": "search",
+      "query": "DOTA2 每日新闻 今日 DOTA2 赛事动态 战队变动",
+      "max_results": 5
+    },
+    {
+      "type": "summarize",
+      "prompt": "请将搜索到的信息总结为一份 DOTA2 每日新闻报，分模块展示：【赛事动态】、【战队变动】、【游戏更新】、【社区热点】。语气要专业且充满热爱。"
+    },
+    {
+      "type": "push",
+      "channel": "feishu",
+      "target": "${FEISHU_TARGET_ID}"
+    }
+  ]
+}
