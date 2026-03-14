@@ -2,6 +2,7 @@
 
 # --- OpenClaw Linux Server 部署脚本 ---
 # 适用系统: Ubuntu / Debian / CentOS / RHEL
+set -e # 遇到错误立即停止执行
 
 # 自动检测包管理器
 if command -v apt-get &> /dev/null; then
@@ -24,27 +25,40 @@ fi
 echo ">>> 检测到系统包管理器: $PKG_MANAGER"
 
 # 1. 更新系统并安装基础工具
-echo ">>> 更新系统并安装基础工具..."
+echo ">>> 更新系统并安装基础工具 (curl, git, $BUILD_TOOLS)..."
 $UPDATE_CMD
 $INSTALL_CMD curl git $BUILD_TOOLS
 
 # 2. 安装 Node.js v22 (LTS)
-echo ">>> 安装 Node.js v22..."
-if [ "$PKG_MANAGER" == "apt-get" ]; then
-    curl -fsSL $NODE_SETUP_URL | sudo -E bash -
-    sudo apt-get install -y nodejs
+if command -v node &> /dev/null; then
+    echo ">>> Node.js 已安装: $(node -v)"
 else
-    curl -fsSL $NODE_SETUP_URL | sudo bash -
-    sudo yum install -y nodejs
+    echo ">>> 正在安装 Node.js v22..."
+    if [ "$PKG_MANAGER" == "apt-get" ]; then
+        curl -fsSL $NODE_SETUP_URL | sudo -E bash -
+        sudo apt-get install -y nodejs
+    else
+        # CentOS/RHEL 特殊处理：先清理缓存
+        sudo yum clean all
+        curl -fsSL $NODE_SETUP_URL | sudo bash -
+        sudo yum install -y nodejs
+    fi
 fi
 
-# 验证 Node.js 版本
+# 再次验证 Node.js 是否安装成功
+if ! command -v node &> /dev/null; then
+    echo "错误: Node.js 安装失败。请尝试手动安装 Node.js v22+ 后再运行此脚本。"
+    exit 1
+fi
+
 node_version=$(node -v)
-echo "Node.js 版本: $node_version"
+echo ">>> Node.js 版本验证成功: $node_version"
 
 # 3. 安装 pnpm (更快的包管理器)
 echo ">>> 安装 pnpm..."
-sudo npm install -g pnpm
+if ! command -v pnpm &> /dev/null; then
+    sudo npm install -g pnpm
+fi
 
 # 4. 安装 OpenClaw CLI 和相关工具
 echo ">>> 安装 OpenClaw CLI, dotenv-cli 和 pm2..."
