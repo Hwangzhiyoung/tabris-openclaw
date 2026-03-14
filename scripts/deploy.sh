@@ -1,17 +1,42 @@
 #!/bin/bash
 
 # --- OpenClaw Linux Server 部署脚本 ---
-# 适用系统: Ubuntu / Debian / CentOS (建议使用 Ubuntu 22.04+ 或 Debian 12+)
+# 适用系统: Ubuntu / Debian / CentOS / RHEL
+
+# 自动检测包管理器
+if command -v apt-get &> /dev/null; then
+    PKG_MANAGER="apt-get"
+    INSTALL_CMD="sudo apt-get install -y"
+    UPDATE_CMD="sudo apt-get update -y"
+    NODE_SETUP_URL="https://deb.nodesource.com/setup_22.x"
+    BUILD_TOOLS="build-essential"
+elif command -v yum &> /dev/null; then
+    PKG_MANAGER="yum"
+    INSTALL_CMD="sudo yum install -y"
+    UPDATE_CMD="sudo yum update -y"
+    NODE_SETUP_URL="https://rpm.nodesource.com/setup_22.x"
+    BUILD_TOOLS="gcc-c++ make"
+else
+    echo "错误: 未能识别的包管理器 (仅支持 apt 或 yum)"
+    exit 1
+fi
+
+echo ">>> 检测到系统包管理器: $PKG_MANAGER"
 
 # 1. 更新系统并安装基础工具
 echo ">>> 更新系统并安装基础工具..."
-sudo apt-get update -y && sudo apt-get upgrade -y
-sudo apt-get install -y curl git build-essential
+$UPDATE_CMD
+$INSTALL_CMD curl git $BUILD_TOOLS
 
 # 2. 安装 Node.js v22 (LTS)
 echo ">>> 安装 Node.js v22..."
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt-get install -y nodejs
+if [ "$PKG_MANAGER" == "apt-get" ]; then
+    curl -fsSL $NODE_SETUP_URL | sudo -E bash -
+    sudo apt-get install -y nodejs
+else
+    curl -fsSL $NODE_SETUP_URL | sudo bash -
+    sudo yum install -y nodejs
+fi
 
 # 验证 Node.js 版本
 node_version=$(node -v)
@@ -22,7 +47,7 @@ echo ">>> 安装 pnpm..."
 sudo npm install -g pnpm
 
 # 4. 安装 OpenClaw CLI 和相关工具
-echo ">>> 安装 OpenClaw CLI 和 dotenv-cli..."
+echo ">>> 安装 OpenClaw CLI, dotenv-cli 和 pm2..."
 sudo pnpm add -g openclaw dotenv-cli pm2
 
 # 5. 检查 OpenClaw 安装
