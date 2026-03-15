@@ -88,7 +88,22 @@ else
     exit 1
 fi
 
-# 6. 项目初始化提示
+# 6. 同步 main 路由提示词到运行时目录（可选）
+PROJECT_ROOT="$(pwd)"
+MAIN_ROUTER_PROMPT_FILE="$PROJECT_ROOT/prompts/main_router_prompt.md"
+MAIN_AGENT_DIR="$HOME/.openclaw/agents/main/agent"
+MAIN_AGENT_PROMPT_FILE="$MAIN_AGENT_DIR/AGENTS.md"
+
+if [ -f "$MAIN_ROUTER_PROMPT_FILE" ]; then
+    echo ">>> 检测到 main 路由提示词，正在同步到运行时目录..."
+    mkdir -p "$MAIN_AGENT_DIR"
+    cp "$MAIN_ROUTER_PROMPT_FILE" "$MAIN_AGENT_PROMPT_FILE"
+    echo ">>> 已同步: $MAIN_ROUTER_PROMPT_FILE -> $MAIN_AGENT_PROMPT_FILE"
+else
+    echo ">>> 未检测到 prompts/main_router_prompt.md，跳过 main 路由提示词同步"
+fi
+
+# 7. 项目初始化提示
 echo ""
 echo "===================================================="
 echo "环境部署完成！接下来请按照以下步骤操作："
@@ -100,6 +115,8 @@ echo "4. 初始化项目配置 (指定当前目录的 openclaw.json):"
 echo "   OPENCLAW_CONFIG_PATH=\"$(pwd)/openclaw.json\" openclaw doctor --fix"
 echo "5. 启动网关 (使用 PM2 后台运行):"
 echo "   OPENCLAW_CONFIG_PATH=\"$(pwd)/openclaw.json\" dotenv -- pm2 start openclaw --name \"openclaw-gateway\" -- gateway start --no-daemon"
+echo "6. 如需强制刷新 main 路由提示词，可手动执行:"
+echo "   cp \"$(pwd)/prompts/main_router_prompt.md\" \"$HOME/.openclaw/agents/main/agent/AGENTS.md\""
 echo ""
 echo "查看日志命令: pm2 logs openclaw-gateway"
 echo "===================================================="
