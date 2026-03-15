@@ -26,6 +26,16 @@ echo ">>> 检测到系统包管理器: $PKG_MANAGER"
 
 # 1. 更新系统并安装基础工具
 echo ">>> 更新系统并安装基础工具 (curl, git, $BUILD_TOOLS)..."
+
+# 解决 Ubuntu apt 锁占用问题
+if [ "$PKG_MANAGER" == "apt-get" ]; then
+    echo ">>> 正在检查 apt 锁状态..."
+    while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+        echo ">>> 系统正在进行后台更新 (unattended-upgrades)，等待 5 秒重试..."
+        sleep 5
+    done
+fi
+
 $UPDATE_CMD
 $INSTALL_CMD curl git $BUILD_TOOLS
 
@@ -58,11 +68,16 @@ echo ">>> Node.js 版本验证成功: $node_version"
 echo ">>> 安装 pnpm..."
 if ! command -v pnpm &> /dev/null; then
     sudo npm install -g pnpm
+    # 解决 pnpm 首次安装可能存在的路径问题
+    sudo pnpm setup || true
+    export PNPM_HOME="/usr/local/share/pnpm"
+    export PATH="$PNPM_HOME:$PATH"
 fi
 
 # 4. 安装 OpenClaw CLI 和相关工具
 echo ">>> 安装 OpenClaw CLI, dotenv-cli 和 pm2..."
-sudo pnpm add -g openclaw dotenv-cli pm2
+# 显式指定全局安装路径，避免 ERR_PNPM_NO_GLOBAL_BIN_DIR
+sudo pnpm add -g openclaw dotenv-cli pm2 --global-dir=/usr/local/share/pnpm-global
 
 # 5. 检查 OpenClaw 安装
 if command -v openclaw &> /dev/null
@@ -81,9 +96,10 @@ echo ""
 echo "1. 将项目上传到服务器 (git clone 或 scp)"
 echo "2. 复制环境变量文件: cp .env.example .env"
 echo "3. 编辑 .env 并填入你的 API Keys: nano .env"
-echo "4. 初始化 OpenClaw 目录: openclaw doctor --fix"
+echo "4. 初始化项目配置 (指定当前目录的 openclaw.json):"
+echo "   OPENCLAW_CONFIG_PATH=\"$(pwd)/openclaw.json\" openclaw doctor --fix"
 echo "5. 启动网关 (使用 PM2 后台运行):"
-echo "   dotenv -- pm2 start openclaw --name \"openclaw-gateway\" -- gateway start --config ./openclaw.json"
+echo "   OPENCLAW_CONFIG_PATH=\"$(pwd)/openclaw.json\" dotenv -- pm2 start openclaw --name \"openclaw-gateway\" -- gateway start --no-daemon"
 echo ""
 echo "查看日志命令: pm2 logs openclaw-gateway"
 echo "===================================================="
