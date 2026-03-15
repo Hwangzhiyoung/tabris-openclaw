@@ -18,15 +18,21 @@
     },
     "list": [
       {
-        "id": "main"
+        "id": "main",
+        "subagents": {
+          "allowAgents": [
+            "dota2-news-agent",
+            "xg-battle-report-agent"
+          ]
+        }
       },
       {
-        "id": "dota2-news",
+        "id": "dota2-news-agent",
         "name": "DOTA2 每日新闻官",
         "agentDir": "~/.openclaw/agents/dota2-news/agent"
       },
       {
-        "id": "xg-battle-report",
+        "id": "xg-battle-report-agent",
         "name": "XG 战报专家",
         "agentDir": "~/.openclaw/agents/xg-battle-report/agent"
       }
@@ -37,6 +43,16 @@
     "nativeSkills": "auto",
     "restart": true,
     "ownerDisplay": "raw"
+  },
+  "tools": {
+    "profile": "coding",
+    "agentToAgent": {
+      "enabled": true,
+      "allow": [
+        "dota2-news-agent",
+        "xg-battle-report-agent"
+      ]
+    }
   },
   "channels": {
     "feishu": {
@@ -50,6 +66,14 @@
       ]
     }
   },
+  "bindings": [
+    {
+      "agentId": "main",
+      "match": {
+        "channel": "feishu"
+      }
+    }
+  ],
   "gateway": {
     "bind": "lan",
     "port": 8080,
